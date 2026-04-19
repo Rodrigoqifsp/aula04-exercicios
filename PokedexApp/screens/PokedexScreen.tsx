@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TextInput, StyleSheet } from 'react-native';
+import { View, Text, FlatList, TextInput, StyleSheet, ActivityIndicator } from 'react-native';
 import { getPokemons, getPokemonDetails } from '../services/api';
 import { Pokemon } from '../types/Pokemon';
 import { PokemonCard } from '../components/PokemonCard';
@@ -7,14 +7,24 @@ import { PokemonCard } from '../components/PokemonCard';
 export const PokedexScreen = () => {
   const [pokemons, setPokemons] = useState<Pokemon[]>([]);
   const [search, setSearch] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      const list = await getPokemons(30); // primeiros 30 pokemons
-      const details = await Promise.all(list.map(p => getPokemonDetails(p.url)));
-      setPokemons(details);
+      try {
+        setIsLoading(true);
+        const list = await getPokemons(30); // primeiros 30 pokemons
+        const details = await Promise.all(list.map(p => getPokemonDetails(p.url)));
+        setPokemons(details);
+      }
+      catch(err) {
+        console.error(err);
+        setError('Falha ao carregar Pokémons. Verifique sua conexão.');
+      }
     };
     fetchData();
+    setIsLoading(false);
   }, []);
 
   const filtered = pokemons.filter(p => p.name.includes(search.toLowerCase()));
@@ -27,12 +37,19 @@ export const PokedexScreen = () => {
         style={styles.input}
         onChangeText={setSearch}
       />
-      <FlatList
-        data={filtered}
-        keyExtractor={item => item.id.toString()}
-        numColumns={2}
-        renderItem={({ item }) => <PokemonCard pokemon={item} />}
-      />
+      {isLoading ? (
+        <ActivityIndicator size="large" />
+      )
+      : error ? (
+        <Text>{error}</Text>
+      ) : (
+        <FlatList
+          data={filtered}
+          keyExtractor={item => item.id.toString()}
+          numColumns={2}
+          renderItem={({ item }) => <PokemonCard pokemon={item} />}
+        />
+      )}
     </View>
   );
 };
