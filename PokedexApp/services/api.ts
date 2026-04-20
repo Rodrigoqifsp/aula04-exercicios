@@ -3,9 +3,9 @@ import { Pokemon, PokemonListItem } from '../types/Pokemon';
 
 const API_BASE = 'https://pokeapi.co/api/v2';
 
-export async function getPokemons(limit: number): Promise<PokemonListItem[]> {
+export async function getPokemons(limit:number = 30, offset:number = 0): Promise<PokemonListItem[]> {
     try {
-        const res = await axios.get(`${API_BASE}/pokemon?limit=${limit}`);
+        const res = await axios.get(`${API_BASE}/pokemon?limit=${limit}&offset=${offset}`);
         return res.data.results;
     } catch (error: any) {
         throw new Error('Falha ao carregar a lista de Pokémons.');
