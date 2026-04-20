@@ -21,13 +21,24 @@ export const PokedexScreen = () => {
       catch(err) {
         console.error(err);
         setError('Falha ao carregar Pokémons. Verifique sua conexão.');
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchData();
-    setIsLoading(false);
   }, []);
 
   const filtered = pokemons.filter(p => p.name.includes(search.toLowerCase()));
+  const emptyState = () => {
+  if (search.trim().length > 0) {
+    return (
+      <Text>Nenhum Pokémon encontrado para "{search}"</Text>
+    );
+  }
+
+  return (
+    <Text>Nenhum Pokémon para exibir no momento.</Text>);
+  };
 
   return (
     <View style={styles.container}>
@@ -48,7 +59,9 @@ export const PokedexScreen = () => {
           keyExtractor={item => item.id.toString()}
           numColumns={2}
           renderItem={({ item }) => <PokemonCard pokemon={item} />}
+          ListEmptyComponent={emptyState}
         />
+        
       )}
     </View>
   );
